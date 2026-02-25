@@ -2,7 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import Init_Database_Connection, { checkConnection } from './configs/db.js';
 import sensorRouter from './routes/sensorRoutes.js';
-dotenv.config();
+import connectMQTT from './utils/mttqSubcriber.js';
+dotenv.config();  
 
 const app = express();
 
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 Init_Database_Connection();
 // checkConnection();
+connectMQTT();
 
 app.get("/", (req, res) => {
   res.send("Server is running 🚀");

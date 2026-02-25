@@ -3,7 +3,7 @@ import SensorDBModel from "../models/Sensor.js";
 export const ingestReading =  async (req, res)=>{
     try{
         const {deviceId, temperature, timestamp} = req.body;
-        if(!deviceId || !temperature || !timestamp){
+        if(!deviceId || temperature === undefined || !timestamp){
             return res.status(400).json({message: "All fields are required"});
         }
         const newReading = new SensorDBModel({
