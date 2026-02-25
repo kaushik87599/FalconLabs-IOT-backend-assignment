@@ -43,7 +43,7 @@ All data is persisted in a MongoDB Atlas collection (`sensors`).
 ```bash
 # 1. Clone the repository
 git clone https://github.com/kaushik87599/FalconLabs-IOT-backend-assignment.git
-cd IOT-backend
+cd FalconLabs-IOT-backend-assignment
 
 # 2. Install dependencies
 npm install
@@ -94,7 +94,9 @@ Accepts a sensor reading and stores it in the database.
 | ------------- | -------- | ---------------------------------- | -------- |
 | `deviceId`    | `string` | Unique identifier for the device   | ✅       |
 | `temperature` | `number` | Temperature reading (°C)           | ✅       |
-| `timestamp`   | `number` | Unix epoch timestamp (milliseconds)| ✅       |
+| `timestamp`   | `number` | Unix epoch timestamp (milliseconds)| ❌ (optional) |
+
+> If `timestamp` is not provided, the server defaults to `Date.now()`.
 
 **Success Response — `201 Created`:**
 
@@ -108,7 +110,15 @@ Accepts a sensor reading and stores it in the database.
 
 ```json
 {
-  "message": "All fields are required"
+  "message": "deviceId must be a non-empty string"
+}
+```
+
+or
+
+```json
+{
+  "message": "temperature must be a number"
 }
 ```
 
@@ -158,14 +168,14 @@ The server includes a built-in MQTT subscriber that listens for temperature data
 
 | Setting  | Value                                    |
 | -------- | ---------------------------------------- |
-| Broker   | `mqtt-dashboard.com`                     |
-| Port     | `8884`|
+| Broker   | `broker.hivemq.com`                      |
+| Port     | `8884`                                   |
 | Topic    | `iot/sensor/<deviceId>/temperature`      |
 | Wildcard | `iot/sensor/+/temperature`               |
 
 ### How It Works
 
-1. On server startup, the MQTT client connects to `mqtt-dashboard.com`.
+1. On server startup, the MQTT client connects to `broker.hivemq.com`.
 2. It subscribes to the topic `iot/sensor/+/temperature` (the `+` wildcard matches any `deviceId`).
 3. When a message arrives:
    - The `deviceId` is extracted from the topic (3rd segment).
@@ -210,6 +220,25 @@ curl -X POST http://localhost:3000/api/sensor/ingest \
     "timestamp": 1716312000000
   }'
 ```
+
+### REST API — Ingest Without Timestamp (auto-generated)
+
+```bash
+curl -X POST http://localhost:3000/api/sensor/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deviceId": "sensor-02",
+    "temperature": 31.2
+  }'
+```
+
+**Expected Response:**
+
+```json
+{ "message": "Reading ingested successfully" }
+```
+
+> The server auto-generates the `timestamp` field using `Date.now()`.
 
 **Expected Response:**
 
@@ -274,6 +303,16 @@ Falcon-assignment/
 ├── package.json
 └── README.md
 ```
+
+---
+
+## 🧩 Assumptions
+
+- `deviceId` uniquely identifies a device
+- `temperature` is in Celsius
+- `timestamp` is in milliseconds (Unix epoch)
+- MQTT payload must contain a numeric temperature value only
+- A single MongoDB Atlas cluster is used for all environments
 
 ---
 

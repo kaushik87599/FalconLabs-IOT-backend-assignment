@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 // Schema at glance
-// • deviceId: string
-// • temperature: number
-// • timestamp: number (epoch ms)
-// • createdAt: ISO date (default: now)
+// • deviceId  : string  (required)
+// • temperature: number  (required)
+// • timestamp : number  (epoch ms, optional — defaults to Date.now)
+// • createdAt / updatedAt: auto-managed by Mongoose timestamps option
 const sensorSchema = new mongoose.Schema({
     deviceId:{
         type: String,
@@ -17,16 +17,11 @@ const sensorSchema = new mongoose.Schema({
     timestamp:{
         type: Number,
         default: Date.now
-        
-        
-    },
-    createdAt:{
-        type: Date,
-        default: Date.now
     }
+}, { collection: 'sensors', timestamps: true });
 
-
-},{collection:'sensors'});
+// Compound index — speeds up "latest reading per device" queries
+sensorSchema.index({ deviceId: 1, timestamp: -1 });
 
 const SensorDBModel = mongoose.model('Sensor', sensorSchema);
 export default SensorDBModel;

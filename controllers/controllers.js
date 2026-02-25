@@ -3,20 +3,20 @@ import SensorDBModel from "../models/Sensor.js";
 export const ingestReading =  async (req, res)=>{
     try{
         const {deviceId, temperature, timestamp} = req.body;
-        if(!deviceId || temperature === undefined || !timestamp){
-            return res.status(400).json({message: "All fields are required"});
+
+        if (!deviceId || typeof deviceId !== "string") {
+            return res.status(400).json({ message: "deviceId must be a non-empty string" });
         }
+        if (temperature === undefined || typeof temperature !== "number") {
+            return res.status(400).json({ message: "temperature must be a number" });
+        }
+
         const newReading = new SensorDBModel({
             deviceId,
             temperature,
-            timestamp
+            timestamp: timestamp || Date.now()
         });
         await newReading.save();
-        // console.log({
-        //     deviceId,
-        //     temperature,
-        //     timestamp
-        // })
         return res.status(201).json({message: "Reading ingested successfully"});
     }catch(err){
         console.log(err);
